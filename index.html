@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz 2.7</title>
+    <title>Quiz 2.8</title>
     <style>
         :root {
             --bg-color: #f4f4f2;
@@ -164,7 +164,7 @@
 
         function startTimer() {
             state = "RUNNING";
-            timeLeft = 3;
+            timeLeft = 10;
             timerEl.innerText = timeLeft;
             instructionEl.innerText = "Warten...";
 
@@ -178,7 +178,7 @@
                     instructionEl.innerText = "Nächste Frage mit [Leertaste]";
                     state = "FINISHED";
                 }
-            }, 500);
+            }, 1000);
         }
 
         function nextQuestion() {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skandinavisches Quiz - Audio & Random</title>
+    <title>Skandinavisches Quiz - Audio Signal</title>
     <style>
         :root {
             --bg-color: #f4f4f2;
@@ -102,27 +102,33 @@
         const antwBEl = document.getElementById('antw-b');
         const instructionEl = document.getElementById('instruction');
 
-        // Erzeugt einen synthetischen Sound (Web Audio API)
+        // Kräftigerer Signalton mittels Web Audio API
         function playSuccessSound() {
             const context = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = context.createOscillator();
-            const gain = context.createGain();
-
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(880, context.currentTime); // Note A5
-            oscillator.frequency.exponentialRampToValueAtTime(440, context.currentTime + 0.5);
             
-            gain.gain.setValueAtTime(0.1, context.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.5);
+            function playTone(freq, start, duration, type = 'square') {
+                const osc = context.createOscillator();
+                const gain = context.createGain();
+                
+                osc.type = type; // 'square' oder 'sawtooth' für präsenteren Klang
+                osc.frequency.setValueAtTime(freq, start);
+                
+                gain.gain.setValueAtTime(0.1, start);
+                gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+                
+                osc.connect(gain);
+                gain.connect(context.destination);
+                
+                osc.start(start);
+                osc.stop(start + duration);
+            }
 
-            oscillator.connect(gain);
-            gain.connect(context.destination);
-
-            oscillator.start();
-            oscillator.stop(context.currentTime + 0.5);
+            // Zweistufiges Alarmsignal
+            const now = context.currentTime;
+            playTone(440, now, 0.2, 'square');       // Erster Ton (A4)
+            playTone(660, now + 0.15, 0.4, 'square'); // Zweiter, höherer Ton (E5)
         }
 
-        // Shuffle-Algorithmus (Fisher-Yates)
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -134,18 +140,15 @@
         async function loadQuestions() {
             try {
                 const response = await fetch('fragen.json');
-                if (!response.ok) throw new Error('Fehler beim Laden');
+                if (!response.ok) throw new Error('Ladefehler');
                 const data = await response.json();
-                
-                // Fragen zufällig mischen
                 quizData = shuffle(data);
-                
                 if (quizData.length > 0) {
                     state = "READY";
                     updateUI();
                 }
             } catch (error) {
-                questionEl.innerText = "Fehler: fragen.json nicht gefunden.";
+                questionEl.innerText = "Fehler beim Laden der fragen.json";
             }
         }
 
@@ -171,8 +174,8 @@
 
                 if (timeLeft <= 0) {
                     clearInterval(interval);
-                    playSuccessSound(); // Sound abspielen
-                    instructionEl.innerText = "Drücke [Leertaste] für Nächste Frage";
+                    playSuccessSound(); 
+                    instructionEl.innerText = "Nächste Frage mit [Leertaste]";
                     state = "FINISHED";
                 }
             }, 1000);
@@ -180,7 +183,6 @@
 
         function nextQuestion() {
             currentIndex = (currentIndex + 1) % quizData.length;
-            // Bei Neustart der Liste erneut mischen
             if (currentIndex === 0) shuffle(quizData);
             updateUI();
         }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz 2.2</title>
+    <title>Quiz 2.3</title>
     <style>
         :root {
             --bg-color: #f4f4f2;
@@ -159,19 +159,7 @@
             antwBEl.innerText = current.antw_b || current.antw_1b;
             timerEl.innerText = "3";
             instructionEl.innerText = "Drücke [Leertaste] zum Starten";
-            state = "READY";
-
-            // Stoppe vorheriges Audio, falls vorhanden
-            if (currentAudio) {
-                currentAudio.pause();
-                currentAudio = null;
-            }
-
-            // Spiele Audio ab, falls in JSON definiert
-            if (current.audio) {
-                currentAudio = new Audio(current.audio);
-                currentAudio.play().catch(e => console.log("Audio-Autoplay blockiert: ", e));
-            }
+            state = "READY";}
         }
 
         function startTimer() {

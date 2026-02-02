@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skandinavisches Quiz - JSON Demo</title>
+    <title>Skandinavisches Quiz - JSON Fetch</title>
     <style>
         :root {
             --bg-color: #f4f4f2;
@@ -33,7 +33,6 @@
             max-width: 500px;
             width: 90%;
             text-align: center;
-            transition: all 0.3s ease;
         }
 
         .timer-display {
@@ -75,15 +74,6 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-
-        .fade {
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
     </style>
 </head>
 <body>
@@ -97,21 +87,14 @@
             <div class="option-box" id="antw-b">-</div>
         </div>
 
-        <p id="instruction" class="instruction">Drücke [Leertaste] zum Starten</p>
+        <p id="instruction" class="instruction">Bitte warten...</p>
     </div>
 
     <script>
-        // Die gewünschte JSON-Struktur
-        const quizData = [
-            {"frage": "Welches Material prägt den skandinavischen Stil?", "antw_a": "Helles Holz", "antw_b": "Dunkler Marmor"},
-            {"frage": "Was beschreibt das Konzept 'Hygge' am besten?", "antw_a": "Strikte Ordnung", "antw_b": "Gemütliche Atmosphäre"},
-            {"frage": "Welche Farbtöne dominieren im Nordic Design?", "antw_a": "Neonfarben", "antw_b": "Pastell & Erdtöne"},
-            {"frage": "Was ist wichtiger in diesem Design-Ansatz?", "antw_a": "Funktionalität", "antw_b": "Prunkvolle Verzierung"}
-        ];
-
+        let quizData = [];
         let currentIndex = 0;
         let timeLeft = 3;
-        let state = "READY"; // READY, RUNNING, FINISHED
+        let state = "LOADING"; 
 
         const timerEl = document.getElementById('timer');
         const questionEl = document.getElementById('question-text');
@@ -119,11 +102,28 @@
         const antwBEl = document.getElementById('antw-b');
         const instructionEl = document.getElementById('instruction');
 
+        // Fragen von externer Datei laden
+        async function loadQuestions() {
+            try {
+                const response = await fetch('fragen.json');
+                if (!response.ok) throw new Error('Fehler beim Laden der JSON');
+                quizData = await response.json();
+                
+                if (quizData.length > 0) {
+                    state = "READY";
+                    updateUI();
+                }
+            } catch (error) {
+                questionEl.innerText = "Fehler: fragen.json nicht gefunden.";
+                console.error(error);
+            }
+        }
+
         function updateUI() {
             const current = quizData[currentIndex];
             questionEl.innerText = current.frage;
             antwAEl.innerText = current.antw_a;
-            antwBEl.innerText = current.antw_b;
+            antwBEl.innerText = current.antw_b || current.antw_1b; // Unterstützung für beide Keys aus deinem Beispiel
             timerEl.innerText = "3";
             instructionEl.innerText = "Drücke [Leertaste] zum Starten";
             state = "READY";
@@ -149,33 +149,19 @@
         }
 
         function nextQuestion() {
-            currentIndex++;
-            if (currentIndex >= quizData.length) {
-                currentIndex = 0; // Loop zum Start
-            }
-            // Kleiner visueller Reset-Effekt
-            document.getElementById('quiz-card').classList.remove('fade');
-            void document.getElementById('quiz-card').offsetWidth; // Trigger reflow
-            document.getElementById('quiz-card').classList.add('fade');
-            
+            currentIndex = (currentIndex + 1) % quizData.length;
             updateUI();
         }
 
         document.addEventListener('keydown', (event) => {
             if (event.code === "Space") {
                 event.preventDefault();
-
-                if (state === "READY") {
-                    startTimer();
-                } else if (state === "FINISHED") {
-                    nextQuestion();
-                }
+                if (state === "READY") startTimer();
+                else if (state === "FINISHED") nextQuestion();
             }
         });
 
-        // Initialisierung
-        updateUI();
+        loadQuestions();
     </script>
-
 </body>
 </html>

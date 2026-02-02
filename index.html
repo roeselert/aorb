@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz 2.5</title>
+    <title>Quiz 2.6</title>
     <style>
         :root {
             --bg-color: #f4f4f2;
@@ -187,20 +187,21 @@
             updateUI();
         }
 
+        // Pointerdown reagiert sofort auf Touch & Maus
+        document.addEventListener('pointerdown', (event) => {
+            // Verhindert, dass das Event mehrfach feuert
+            handleInteraction();
+        });
         document.addEventListener('keydown', (event) => {
-            if (event.code === "Space") {
-                event.preventDefault();
-                if (state === "READY") startTimer();
-                else if (state === "FINISHED") nextQuestion();
-            }
+            event.preventDefault();
+            if (state === "READY") startTimer();
+            else if (state === "FINISHED") nextQuestion();
         });
 
        document.addEventListener('click', (event) => {
-            if (event.code === "Space") {
-                event.preventDefault();
-                if (state === "READY") startTimer();
-                else if (state === "FINISHED") nextQuestion();
-            }
+            event.preventDefault();
+            if (state === "READY") startTimer();
+            else if (state === "FINISHED") nextQuestion();
         });
 
         loadQuestions();

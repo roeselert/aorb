@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skandinavisches Quiz - Timer</title>
+    <title>Skandinavisches Quiz - JSON Demo</title>
     <style>
         :root {
             --bg-color: #f4f4f2;
             --text-color: #2c3e50;
-            --accent-color: #d1d9cf; /* Dezentes Graugrün */
+            --accent-color: #a8b5a2;
             --card-bg: #ffffff;
             --border-radius: 12px;
         }
@@ -22,6 +22,7 @@
             align-items: center;
             height: 100vh;
             margin: 0;
+            overflow: hidden;
         }
 
         .container {
@@ -29,9 +30,10 @@
             padding: 4rem;
             border-radius: var(--border-radius);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
-            max-width: 450px;
+            max-width: 500px;
             width: 90%;
             text-align: center;
+            transition: all 0.3s ease;
         }
 
         .timer-display {
@@ -44,81 +46,135 @@
 
         h1 {
             font-weight: 400;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             margin-bottom: 2.5rem;
-            letter-spacing: 1px;
-            text-transform: uppercase;
+            min-height: 3.5rem;
+            line-height: 1.4;
         }
 
         .options {
             display: flex;
-            gap: 1rem;
+            gap: 1.5rem;
             justify-content: center;
         }
 
         .option-box {
             border: 1px solid #eee;
-            padding: 0.8rem 1.5rem;
+            padding: 1rem;
             border-radius: var(--border-radius);
-            font-size: 0.9rem;
-            color: #888;
+            font-size: 0.95rem;
+            color: #555;
             flex: 1;
+            background: #fafafa;
         }
 
         .instruction {
-            margin-top: 2rem;
+            margin-top: 2.5rem;
             font-size: 0.8rem;
-            color: #aaa;
+            color: #bbb;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .fade {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <div class="container" id="quiz-card">
         <div id="timer" class="timer-display">3</div>
-        <h1 id="question">Ist Minimalismus zeitlos?</h1>
+        <h1 id="question-text">Lade Fragen...</h1>
         
         <div class="options">
-            <div class="option-box">Ja</div>
-            <div class="option-box">Nein</div>
+            <div class="option-box" id="antw-a">-</div>
+            <div class="option-box" id="antw-b">-</div>
         </div>
 
-        <p class="instruction">Drücke die [Leertaste], um den Timer zu starten</p>
+        <p id="instruction" class="instruction">Drücke [Leertaste] zum Starten</p>
     </div>
 
     <script>
-        let timeLeft = 3;
-        let timerRunning = false;
-        const timerElement = document.getElementById('timer');
+        // Die gewünschte JSON-Struktur
+        const quizData = [
+            {"frage": "Welches Material prägt den skandinavischen Stil?", "antw_a": "Helles Holz", "antw_b": "Dunkler Marmor"},
+            {"frage": "Was beschreibt das Konzept 'Hygge' am besten?", "antw_a": "Strikte Ordnung", "antw_b": "Gemütliche Atmosphäre"},
+            {"frage": "Welche Farbtöne dominieren im Nordic Design?", "antw_a": "Neonfarben", "antw_b": "Pastell & Erdtöne"},
+            {"frage": "Was ist wichtiger in diesem Design-Ansatz?", "antw_a": "Funktionalität", "antw_b": "Prunkvolle Verzierung"}
+        ];
 
-        // Event-Listener für Tastaturabfragen (Space bar)
-        document.addEventListener('keydown', function(event) {
-            // Verhindert Scrollen bei Leertaste
+        let currentIndex = 0;
+        let timeLeft = 3;
+        let state = "READY"; // READY, RUNNING, FINISHED
+
+        const timerEl = document.getElementById('timer');
+        const questionEl = document.getElementById('question-text');
+        const antwAEl = document.getElementById('antw-a');
+        const antwBEl = document.getElementById('antw-b');
+        const instructionEl = document.getElementById('instruction');
+
+        function updateUI() {
+            const current = quizData[currentIndex];
+            questionEl.innerText = current.frage;
+            antwAEl.innerText = current.antw_a;
+            antwBEl.innerText = current.antw_b;
+            timerEl.innerText = "3";
+            instructionEl.innerText = "Drücke [Leertaste] zum Starten";
+            state = "READY";
+        }
+
+        function startTimer() {
+            state = "RUNNING";
+            timeLeft = 3;
+            timerEl.innerText = timeLeft;
+            instructionEl.innerText = "Warten...";
+
+            const interval = setInterval(() => {
+                timeLeft--;
+                timerEl.innerText = timeLeft;
+
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    timerEl.innerText = "✓";
+                    instructionEl.innerText = "Drücke [Leertaste] für Nächste Frage";
+                    state = "FINISHED";
+                }
+            }, 1000);
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            if (currentIndex >= quizData.length) {
+                currentIndex = 0; // Loop zum Start
+            }
+            // Kleiner visueller Reset-Effekt
+            document.getElementById('quiz-card').classList.remove('fade');
+            void document.getElementById('quiz-card').offsetWidth; // Trigger reflow
+            document.getElementById('quiz-card').classList.add('fade');
+            
+            updateUI();
+        }
+
+        document.addEventListener('keydown', (event) => {
             if (event.code === "Space") {
                 event.preventDefault();
-                
-                if (!timerRunning) {
-                    startCountdown();
+
+                if (state === "READY") {
+                    startTimer();
+                } else if (state === "FINISHED") {
+                    nextQuestion();
                 }
             }
         });
 
-        function startCountdown() {
-            timerRunning = true;
-            timeLeft = 3;
-            timerElement.innerText = timeLeft;
-
-            const interval = setInterval(() => {
-                timeLeft--;
-                timerElement.innerText = timeLeft;
-
-                if (timeLeft <= 0) {
-                    clearInterval(interval);
-                    timerElement.innerText = "✓";
-                    timerRunning = false;
-                }
-            }, 1000); // Führt die Funktion jede Sekunde aus
-        }
+        // Initialisierung
+        updateUI();
     </script>
 
 </body>

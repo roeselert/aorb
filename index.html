@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimalistisches Quiz</title>
+    <title>Skandinavisches Quiz - Timer</title>
     <style>
         :root {
-            --bg-color: #f9f9f7;
-            --text-color: #333333;
-            --accent-color: #a8b5a2; /* Salbeigrün - skandinavisch */
+            --bg-color: #f4f4f2;
+            --text-color: #2c3e50;
+            --accent-color: #d1d9cf; /* Dezentes Graugrün */
             --card-bg: #ffffff;
-            --border-radius: 8px;
+            --border-radius: 12px;
         }
 
         body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Inter', -apple-system, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             display: flex;
@@ -22,73 +22,102 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            line-height: 1.6;
         }
 
         .container {
             background-color: var(--card-bg);
-            padding: 3rem;
+            padding: 4rem;
             border-radius: var(--border-radius);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+            max-width: 450px;
             width: 90%;
             text-align: center;
         }
 
+        .timer-display {
+            font-size: 4rem;
+            font-weight: 200;
+            margin-bottom: 1.5rem;
+            color: var(--accent-color);
+            height: 5rem;
+        }
+
         h1 {
-            font-weight: 300;
-            font-size: 1.5rem;
-            margin-bottom: 2rem;
-            letter-spacing: 0.5px;
+            font-weight: 400;
+            font-size: 1.2rem;
+            margin-bottom: 2.5rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
         .options {
             display: flex;
-            flex-direction: column;
             gap: 1rem;
+            justify-content: center;
         }
 
-        button {
-            background-color: transparent;
-            border: 1px solid var(--accent-color);
-            color: var(--text-color);
-            padding: 1rem;
+        .option-box {
+            border: 1px solid #eee;
+            padding: 0.8rem 1.5rem;
             border-radius: var(--border-radius);
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        button:hover {
-            background-color: var(--accent-color);
-            color: white;
-        }
-
-        .feedback {
-            margin-top: 1.5rem;
             font-size: 0.9rem;
-            min-height: 1.5rem;
             color: #888;
+            flex: 1;
+        }
+
+        .instruction {
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            color: #aaa;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1 id="question">Welches Design-Prinzip bevorzugst du?</h1>
+        <div id="timer" class="timer-display">3</div>
+        <h1 id="question">Ist Minimalismus zeitlos?</h1>
         
         <div class="options">
-            <button onclick="selectOption('Funktionalismus')">Funktionalismus</button>
-            <button onclick="selectOption('Ästhetik')">Ästhetik</button>
+            <div class="option-box">Ja</div>
+            <div class="option-box">Nein</div>
         </div>
 
-        <div id="feedback" class="feedback"></div>
+        <p class="instruction">Drücke die [Leertaste], um den Timer zu starten</p>
     </div>
 
     <script>
-        function selectOption(answer) {
-            const feedback = document.getElementById('feedback');
-            feedback.innerText = `Du hast dich für "${answer}" entschieden.`;
+        let timeLeft = 3;
+        let timerRunning = false;
+        const timerElement = document.getElementById('timer');
+
+        // Event-Listener für Tastaturabfragen (Space bar)
+        document.addEventListener('keydown', function(event) {
+            // Verhindert Scrollen bei Leertaste
+            if (event.code === "Space") {
+                event.preventDefault();
+                
+                if (!timerRunning) {
+                    startCountdown();
+                }
+            }
+        });
+
+        function startCountdown() {
+            timerRunning = true;
+            timeLeft = 3;
+            timerElement.innerText = timeLeft;
+
+            const interval = setInterval(() => {
+                timeLeft--;
+                timerElement.innerText = timeLeft;
+
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    timerElement.innerText = "✓";
+                    timerRunning = false;
+                }
+            }, 1000); // Führt die Funktion jede Sekunde aus
         }
     </script>
 

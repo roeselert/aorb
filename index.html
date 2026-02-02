@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimalistisches Quiz</title>
+    <style>
+        :root {
+            --bg-color: #f9f9f7;
+            --text-color: #333333;
+            --accent-color: #a8b5a2; /* Salbeigrün - skandinavisch */
+            --card-bg: #ffffff;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 3rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        h1 {
+            font-weight: 300;
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            letter-spacing: 0.5px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        button {
+            background-color: transparent;
+            border: 1px solid var(--accent-color);
+            color: var(--text-color);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .feedback {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            min-height: 1.5rem;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 id="question">Welches Design-Prinzip bevorzugst du?</h1>
+        
+        <div class="options">
+            <button onclick="selectOption('Funktionalismus')">Funktionalismus</button>
+            <button onclick="selectOption('Ästhetik')">Ästhetik</button>
+        </div>
+
+        <div id="feedback" class="feedback"></div>
+    </div>
+
+    <script>
+        function selectOption(answer) {
+            const feedback = document.getElementById('feedback');
+            feedback.innerText = `Du hast dich für "${answer}" entschieden.`;
+        }
+    </script>
+
+</body>
+</html>

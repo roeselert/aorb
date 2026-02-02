@@ -1,5 +1,4 @@
 [
-[
   {"frage": "Der Drucker brennt: Löschversuch mit dem Feuerlöscher oder einfach ein Ticket beim Support eröffnen?", "antw_a": "Action-Hero-Modus", "antw_b": "Prozessgetreu abwarten"},
   {"frage": "Legacy-Code im Keller: Mutig refactoren oder hoffen, dass er dich nicht bemerkt?", "antw_a": "Code-Ninja", "antw_b": "Tarnkappen-Modus"},
   {"frage": "Feierabend-Sport: Extrem-Couch-Chilling oder Iron-Man-Training im Flur?", "antw_a": "Horizontales Relaxing", "antw_b": "Schweißperlen-Maschine"},
@@ -100,6 +99,4 @@
   {"frage": "Frühstückstyp: Süß (Marmelade) oder Herzhaft (Mettbrötchen)?", "antw_a": "Zuckerschnute", "antw_b": "Wurst-Willi"},
   {"frage": "Urlaubsbuchung: Last Minute (Abenteuer) oder 1 Jahr im Voraus (Sicherheit)?", "antw_a": "Spontan-Springer", "antw_b": "Frühbucher-Profi"},
   {"frage": "Letzte Frage: Kaffee aus der Tasse oder direkt aus der Kanne?", "antw_a": "Zivilisierter Trinker", "antw_b": "Vollgas-Admin"}
-]
-
 ]

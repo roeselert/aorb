@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz 2.10</title>
+    <title>Quiz 2.11</title>
     <style>
         :root {
             --bg-color: #f4f4f2;
@@ -93,8 +93,9 @@
     <script>
         let quizData = [];
         let currentIndex = 0;
-        let timeLeft = 3;
+        let timeLeft = 10; // Startet bei 10
         let state = "LOADING"; 
+        let timerInterval = null; // Speicher für den Intervall-Prozess
 
         const timerEl = document.getElementById('timer');
         const questionEl = document.getElementById('question-text');
@@ -102,31 +103,23 @@
         const antwBEl = document.getElementById('antw-b');
         const instructionEl = document.getElementById('instruction');
 
-        // Kräftigerer Signalton mittels Web Audio API
         function playSuccessSound() {
             const context = new (window.AudioContext || window.webkitAudioContext)();
-            
             function playTone(freq, start, duration, type = 'square') {
                 const osc = context.createOscillator();
                 const gain = context.createGain();
-                
-                osc.type = type; // 'square' oder 'sawtooth' für präsenteren Klang
+                osc.type = type;
                 osc.frequency.setValueAtTime(freq, start);
-                
                 gain.gain.setValueAtTime(0.1, start);
                 gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
-                
                 osc.connect(gain);
                 gain.connect(context.destination);
-                
                 osc.start(start);
                 osc.stop(start + duration);
             }
-
-            // Zweistufiges Alarmsignal
             const now = context.currentTime;
-            playTone(440, now, 0.2, 'square');       // Erster Ton (A4)
-            playTone(660, now + 0.15, 0.4, 'square'); // Zweiter, höherer Ton (E5)
+            playTone(440, now, 0.2, 'square');
+            playTone(660, now + 0.15, 0.4, 'square');
         }
 
         function shuffle(array) {
@@ -155,59 +148,66 @@
         function updateUI() {
             const current = quizData[currentIndex];
             questionEl.innerText = current.frage;
-            antwAEl.innerText = 'A) '+current.antw_a;
-            antwBEl.innerText = 'B) '+current.antw_b;
-            timerEl.innerText = "3";
+            antwAEl.innerText = 'A) ' + current.antw_a;
+            antwBEl.innerText = 'B) ' + current.antw_b;
+            timerEl.innerText = "10"; // Anzeige initial auf 10
             instructionEl.innerText = "Drücke [Leertaste] zum Starten";
             state = "READY";
         }
 
         function startTimer() {
+            // Falls bereits ein Timer läuft: Stoppen und UI zurücksetzen
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+
             state = "RUNNING";
             timeLeft = 10;
             timerEl.innerText = timeLeft;
-            instructionEl.innerText = "Warten...";
+            instructionEl.innerText = "Zeit läuft...";
 
-            const interval = setInterval(() => {
+            timerInterval = setInterval(() => {
                 timeLeft--;
-                timerEl.innerText = (timeLeft > 0) ? timeLeft : "✓";
-
+                
                 if (timeLeft <= 0) {
-                    clearInterval(interval);
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    timerEl.innerText = "✓";
                     playSuccessSound(); 
                     instructionEl.innerText = "Nächste Frage mit [Leertaste]";
                     state = "FINISHED";
+                } else {
+                    timerEl.innerText = timeLeft;
                 }
             }, 1000);
         }
 
-        function nextQuestion() {
-            currentIndex = (currentIndex + 1) % quizData.length;
-            if (currentIndex === 0) shuffle(quizData);
-            updateUI();
+        function handleAction(event) {
+            event.preventDefault();
+            
+            if (state === "RUNNING") {
+                // Timer stoppen bei erneutem Drücken
+                clearInterval(timerInterval);
+                timerInterval = null;
+                state = "FINISHED";
+                instructionEl.innerText = "Gestoppt! Weiter mit [Leertaste]";
+            } else if (state === "FINISHED" || state === "READY") {
+                // Neue Frage laden und Timer starten
+                if (state === "FINISHED") {
+                    currentIndex = (currentIndex + 1) % quizData.length;
+                    if (currentIndex === 0) shuffle(quizData);
+                    updateUI();
+                }
+                startTimer();
+            }
         }
 
-        document.addEventListener('keydown', (event) => {
-            event.preventDefault();
-            nextQuestion();
-            startTimer();
-            /*
-            if (state === "READY") startTimer();
-            else if (state === "FINISHED") nextQuestion();
-            */
-        });
-
-       document.addEventListener('click', (event) => {
-            event.preventDefault();
-            nextQuestion();
-            startTimer();
-            /*
-            if (state === "READY") startTimer();
-            else if (state === "FINISHED") nextQuestion();
-            */
-        });
+        document.addEventListener('keydown', (e) => { if(e.code === "Space") handleAction(e); });
+        document.addEventListener('click', handleAction);
 
         loadQuestions();
     </script>
+
 </body>
 </html>
